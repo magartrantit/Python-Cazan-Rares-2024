@@ -1,0 +1,1 @@
+Acesta este un exemplu de paragraf pentru a testa frecvența caracterelor. Acest paragraf conține mai multe caractere și va fi folosit pentru a genera un grafic text.
