@@ -1,9 +1,12 @@
 class Matrix:
 
-    def __init__(self, n, m):
+    def __init__(self, n, m, data=None):
         self.n = n
         self.m = m
-        self.data = []
+        if data:
+            self.data = data
+        else:
+            self.data = [[0] * m for _ in range(n)]  # Initialize with zeros
 
     def get(self, i, j):
         return self.data[i][j]
@@ -15,27 +18,20 @@ class Matrix:
         transposed = [[self.data[j][i] for j in range(self.n)] for i in range(self.m)]
         return Matrix(self.m, self.n, transposed)
     
-    def multiplication(self, m):
-        if self.m != m.n:
-            return None
-        n = []
+    def multiply(self, other):
+        if self.m != other.n:
+            raise ValueError("Matrices cannot be multiplied")
+
+        result = Matrix(self.n, other.m)
         for i in range(self.n):
-            n.append([])
-            for j in range(m.m):
-                n[i].append(0)
-                for k in range(self.m):
-                    n[i][j] += self.n[i][k] * m.n[k][j]
-        return Matrix(n, m.m)
+            for j in range(other.m):
+                result.data[i][j] = sum(self.get(i, k) * other.get(k, j) for k in range(self.m))
+        return result
     
-    def apply(self, func):
+    def apply_transformation(self, func):
         for i in range(self.n):
             for j in range(self.m):
                 self.data[i][j] = func(self.data[i][j])
 
-    def __iter__(self):
-        for row in self.data:
-            for elem in row:
-                yield elem
-
-    def __repr__(self):
+    def __str__(self):
         return '\n'.join([' '.join(map(str, row)) for row in self.data])
