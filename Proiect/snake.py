@@ -7,7 +7,6 @@ black = pygame.Color(0, 0, 0)
 white = pygame.Color(255, 255, 255)
 red = pygame.Color(213, 50, 80)
 green = pygame.Color(0, 255, 0)
-blue = pygame.Color(50, 153, 213)
 
 #game variables
 window_x = 720
@@ -48,17 +47,18 @@ def gmae_over():
     quit()
 
 def main():
+    global change_to, direction, fruit_pos, fruit_spawn, score
     while True:
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
                     change_to = 'UP'
-            if event.key == pygame.K_DOWN:
-                change_to = 'DOWN'
-            if event.key == pygame.K_LEFT:
-                change_to = 'LEFT'
-            if event.key == pygame.K_RIGHT:
-                change_to = 'RIGHT'
+                if event.key == pygame.K_DOWN:
+                    change_to = 'DOWN'
+                if event.key == pygame.K_LEFT:
+                    change_to = 'LEFT'
+                if event.key == pygame.K_RIGHT:
+                    change_to = 'RIGHT'
 
         if change_to == 'UP' and direction != 'DOWN':
             direction = 'UP'
