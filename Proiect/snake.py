@@ -35,16 +35,55 @@ def show_score(choice, color, font, size):
     srect = ssurface.get_rect()
     game_window.blit(ssurface, srect)
 
+def set_game():
+    global snake_pos, snake_body, snake_speed, direction, change_to, fruit_pos, fruit_spawn, score
+    snake_pos = [100, 50]
+    snake_body = [ [100, 50], [90, 50], [80, 50], [70, 50]]
+    snake_speed = 15
+    direction = 'RIGHT'
+    change_to = direction
+    fruit_spawn = True
+    fruit_pos = [random.randrange(1, (window_x//10)) * 10, random.randrange(1, (window_y//10)) * 10]
+    score = 0
+
 def gmae_over():
-    font = pygame.font.SysFont('arial', 50)
-    gameover_surface = font.render('Your Score is: ' + str(score), True, red)
-    gameover_rect = gameover_surface.get_rect()
-    gameover_rect.midtop = (window_x/2, window_y/4)
-    game_window.blit(gameover_surface, gameover_rect)
-    pygame.display.flip()
-    time.sleep(2)
-    pygame.quit()
-    quit()
+
+    while True:
+        game_window.fill(black)
+        
+        font = pygame.font.SysFont('arial', 50)
+        gameover_surface = font.render('Your Score is: ' + str(score), True, red)
+        gameover_rect = gameover_surface.get_rect()
+        gameover_rect.midtop = (window_x/2, window_y/4)
+        game_window.blit(gameover_surface, gameover_rect)
+        
+        retry_button = pygame.Rect(window_x/4, window_y/2, 150, 50)
+        pygame.draw.rect(game_window, green, retry_button)
+        retry_font = pygame.font.SysFont('arial', 20)
+        retry_surface = retry_font.render('Retry', True, white)
+        retry_rect = retry_surface.get_rect(center = retry_button.center)
+        game_window.blit(retry_surface, retry_rect)
+
+        quit_button = pygame.Rect(window_x/2 + 50, window_y/2, 150, 50)
+        pygame.draw.rect(game_window, green, quit_button)
+        quit_font = pygame.font.SysFont('arial', 20)
+        quit_surface = quit_font.render('Quit', True, white)
+        quit_rect = quit_surface.get_rect(center = quit_button.center)
+        game_window.blit(quit_surface, quit_rect)
+
+        pygame.display.flip()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                x, y = event.pos
+                if retry_button.collidepoint(x, y):
+                    set_game()
+                    main()
+                if quit_button.collidepoint(x, y):
+                    pygame.quit()
+                    quit()
 
 def main():
     global change_to, direction, fruit_pos, fruit_spawn, score
