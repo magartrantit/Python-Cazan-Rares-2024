@@ -13,12 +13,27 @@ blue = pygame.Color(50, 153, 213)
 grey = pygame.Color(150, 150, 150)
 
 #game variables
-window_x = 720
-window_y = 480
+window_x = 500
+window_y = 500
+obstavles = []
 pygame.init()
 pygame.display.set_caption('Snake Game')
-game_window = pygame.display.set_mode((window_x, window_y))
 fps = pygame.time.Clock()
+
+def put_obstacles():
+    for obs in obstacles:
+        pygame.draw.rect(game_window, grey, pygame.Rect(obs[0], obs[1], 20, 20))
+
+def load_dimensions(file):
+    global window_x, window_y, obstacles
+    try:
+        with open(file, 'r') as f:
+            data = json.load(f)
+            window_x, window_y = data.get("board_size", [720, 480])
+            obstacles = data.get("obstacles", [])
+    except Exception as e:
+        print("Nu s-a putut citi fisierul de configurare: {e}")
+        sys.exit()
 
 #snake
 snake_pos = [120, 80]
@@ -34,6 +49,7 @@ fruit_pos = [random.randrange(0, (window_x//20)) * 20, random.randrange(0, (wind
 #score
 score = 0
 high_score = 0
+
 def show_score(choice, color, font, size):
     sfont = pygame.font.SysFont(font, size)
     ssurface = sfont.render('Score: ' + str(score), True, color)
@@ -82,14 +98,18 @@ def game_over():
         gameover_rect.midtop = (window_x/2, window_y/4)
         game_window.blit(gameover_surface, gameover_rect)
         
-        retry_button = pygame.Rect(window_x/4, window_y/2, 150, 50)
+        retry_button_x = (window_x/2) - 50 - 150
+        retry_button_y = (window_y/2)
+        retry_button = pygame.Rect(retry_button_x, retry_button_y, 150, 50)
         pygame.draw.rect(game_window, green, retry_button)
         retry_font = pygame.font.SysFont('arial', 20)
         retry_surface = retry_font.render('Retry', True, white)
         retry_rect = retry_surface.get_rect(center = retry_button.center)
         game_window.blit(retry_surface, retry_rect)
 
-        quit_button = pygame.Rect(window_x/2 + 50, window_y/2, 150, 50)
+        quit_button_x = (window_x/2) + 50
+        quit_button_y = (window_y/2)
+        quit_button = pygame.Rect(quit_button_x, quit_button_y, 150, 50)
         pygame.draw.rect(game_window, green, quit_button)
         quit_font = pygame.font.SysFont('arial', 20)
         quit_surface = quit_font.render('Quit', True, white)
@@ -108,6 +128,12 @@ def game_over():
                     main()
                 if quit_button.collidepoint(x, y):
                     quit_game()
+
+def valid_pos(pos):
+    for obs in obstacles:
+        if pos == obs:
+            return False
+    return True
 
 def main():
     global change_to, direction, fruit_pos, fruit_spawn, score
@@ -150,10 +176,16 @@ def main():
         
 
         if not fruit_spawn:
-            fruit_pos = [random.randrange(0, (window_x//20)) * 20, random.randrange(0, (window_y//20)) * 20]
+            while True:
+                new_fruit_pos = [random.randrange(0, (window_x//20)) * 20, random.randrange(0, (window_y//20)) * 20]
+                if valid_pos(fruit_pos):
+                    fruit_pos = new_fruit_pos
+                    break
 
         fruit_spawn = True
         game_window.fill(black)
+
+        put_obstacles()
 
         for pos in snake_body:
             pygame.draw.rect(game_window, blue, pygame.Rect(pos[0], pos[1], 20, 20))
@@ -177,4 +209,9 @@ def main():
 
 
 if __name__ == '__main__':
+    if len(sys.argv) != 2:
+        print("Trebuie sa dati fisierul de configurare")
+        sys.exit()
+    load_dimensions(sys.argv[1])
+    game_window = pygame.display.set_mode((window_x, window_y))
     main()
