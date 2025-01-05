@@ -1,6 +1,8 @@
 import pygame
 import time
 import random
+import sys
+import json
 
 #colors
 black = pygame.Color(0, 0, 0)
@@ -8,6 +10,7 @@ white = pygame.Color(255, 255, 255)
 red = pygame.Color(213, 50, 80)
 green = pygame.Color(0, 255, 0)
 blue = pygame.Color(50, 153, 213)
+grey = pygame.Color(150, 150, 150)
 
 #game variables
 window_x = 720
@@ -30,11 +33,17 @@ fruit_pos = [random.randrange(0, (window_x//20)) * 20, random.randrange(0, (wind
 
 #score
 score = 0
+high_score = 0
 def show_score(choice, color, font, size):
     sfont = pygame.font.SysFont(font, size)
     ssurface = sfont.render('Score: ' + str(score), True, color)
     srect = ssurface.get_rect()
     game_window.blit(ssurface, srect)
+
+def update_high_score():
+    global high_score
+    if score>high_score:
+        high_score = score
 
 def set_game():
     global snake_pos, snake_body, snake_speed, direction, change_to, fruit_pos, fruit_spawn, score
@@ -47,8 +56,22 @@ def set_game():
     fruit_pos = [random.randrange(0, (window_x//20)) * 20, random.randrange(0, (window_y//20)) * 20]
     score = 0
 
+def quit_game():
+    game_window.fill(black)
+    font = pygame.font.SysFont('arial', 50)
+    high_score_surface = font.render('High Score: ' + str(high_score), True, red)
+    high_score_rect = high_score_surface.get_rect()
+    high_score_rect.midtop = (window_x/2, window_y/4)
+    game_window.blit(high_score_surface, high_score_rect)
 
-def gmae_over():
+    pygame.display.flip()
+    time.sleep(3)
+    pygame.quit()
+    quit()
+
+def game_over():
+    global high_score
+    update_high_score()
 
     while True:
         game_window.fill(black)
@@ -84,8 +107,7 @@ def gmae_over():
                     set_game()
                     main()
                 if quit_button.collidepoint(x, y):
-                    pygame.quit()
-                    quit()
+                    quit_game()
 
 def main():
     global change_to, direction, fruit_pos, fruit_spawn, score
@@ -139,13 +161,13 @@ def main():
         pygame.draw.rect(game_window, white, pygame.Rect(fruit_pos[0], fruit_pos[1], 20, 20))
 
         if snake_pos[0] < 0 or snake_pos[0] > window_x-10:
-            gmae_over()
+            game_over()
         if snake_pos[1] < 0 or snake_pos[1] > window_y-10:
-            gmae_over()
+            game_over()
 
         for part in snake_body[1:]:
             if snake_pos[0] == part[0] and snake_pos[1] == part[1]:
-                gmae_over()
+                game_over()
 
         show_score(1, white, 'times new roman', 20)
         pygame.display.update()
