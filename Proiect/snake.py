@@ -10,7 +10,6 @@ white = pygame.Color(255, 255, 255)
 red = pygame.Color(213, 50, 80)
 green = pygame.Color(0, 255, 0)
 blue = pygame.Color(50, 153, 213)
-grey = pygame.Color(150, 150, 150)
 
 #game variables
 window_x = 500
@@ -22,7 +21,7 @@ fps = pygame.time.Clock()
 
 def put_obstacles():
     for obs in obstacles:
-        pygame.draw.rect(game_window, grey, pygame.Rect(obs[0], obs[1], 20, 20))
+        pygame.draw.rect(game_window, red, pygame.Rect(obs[0], obs[1], 20, 20))
 
 def load_dimensions(file):
     global window_x, window_y, obstacles
@@ -192,6 +191,10 @@ def main():
         
         pygame.draw.rect(game_window, white, pygame.Rect(fruit_pos[0], fruit_pos[1], 20, 20))
 
+        for obs in obstacles:
+            if snake_pos[0] == obs[0] and snake_pos[1] == obs[1]:
+                game_over()
+
         if snake_pos[0] < 0 or snake_pos[0] > window_x-10:
             game_over()
         if snake_pos[1] < 0 or snake_pos[1] > window_y-10:
@@ -204,8 +207,6 @@ def main():
         show_score(1, white, 'times new roman', 20)
         pygame.display.update()
         fps.tick(snake_speed)
-
-
 
 
 if __name__ == '__main__':
