@@ -4,14 +4,18 @@ import random
 import sys
 import json
 
-#colors
+"""
+culori
+"""
 black = pygame.Color(0, 0, 0)
 white = pygame.Color(255, 255, 255)
 red = pygame.Color(213, 50, 80)
 green = pygame.Color(0, 255, 0)
 blue = pygame.Color(50, 153, 213)
 
-#game variables
+"""
+variabile de joc pentru dimensiunile ferestrei obstacole si fps-uri
+"""
 window_x = 500
 window_y = 500
 obstavles = []
@@ -20,10 +24,25 @@ pygame.display.set_caption('Snake Game')
 fps = pygame.time.Clock()
 
 def put_obstacles():
+    """
+    Deseneaza obstacolele pe ecran. 
+    ele sunt reprezentate prin patrate rosii pozitionate dupa coordonatele din json.
+    """
     for obs in obstacles:
         pygame.draw.rect(game_window, red, pygame.Rect(obs[0], obs[1], 20, 20))
 
 def load_dimensions(file):
+    """
+    Aceasta functie incarca dimensiunile tablei si pozitiile obstacolelor.
+
+    Parametri:
+        file(string) - fisierul de configurare in format json
+    
+    Variabile globale modificate:
+        window_x(int) - dimensiunea ferestrei pe axa x
+        window_y(int) - dimensiunea ferestrei pe axa y
+        obstacles(Any) - lista de obstacole
+    """
     global window_x, window_y, obstacles
     try:
         with open(file, 'r') as f:
@@ -34,33 +53,67 @@ def load_dimensions(file):
         print("Nu s-a putut citi fisierul de configurare: {e}")
         sys.exit()
 
-#snake
+"""
+variabile de joc pentru snake: pozitia, corpul, viteza, directia, schimbarea directiei
+"""
 snake_pos = [120, 80]
 snake_body = [[120, 80], [100, 60], [80, 40], [60, 20]]
 snake_speed = 15
 direction = 'RIGHT'
 change_to = direction
 
-#fruit
+"""
+variabile de joc pentru fruct: pozitia, daca trebuie sa apara
+"""
 fruit_spawn = True
 fruit_pos = [random.randrange(0, (window_x//20)) * 20, random.randrange(0, (window_y//20)) * 20]
 
-#score
+"""
+variabile de joc pentru scor
+"""
 score = 0
 high_score = 0
 
 def show_score(choice, color, font, size):
+    """
+    Functia afiseaza scorul pe ecran
+
+    Parametri:
+        choice(int) - alegerea pentru font
+        color(pygame.Color) - culoarea textului
+        font(string) - fontul textului
+        size(int) - dimensiunea textului
+    """
     sfont = pygame.font.SysFont(font, size)
     ssurface = sfont.render('Score: ' + str(score), True, color)
     srect = ssurface.get_rect()
     game_window.blit(ssurface, srect)
 
 def update_high_score():
+    """
+    Functia actualizeaza high score-ul daca scorul curent este mai mare
+
+    Variabile globale modificate:
+        high_score(int) - high score-ul jocului
+    """
     global high_score
     if score>high_score:
         high_score = score
 
 def set_game():
+    """
+    Functia reseteaza variabilele de joc la valorile initiale
+
+    Variabile globale modificate:
+        snake_pos(list[int]) - pozitia capului sarpelui
+        snake_body(list[list[int]]) - corpul sarpelui
+        snake_speed(int) - viteza sarpelui
+        direction(string) - directia sarpelui
+        change_to(string) - schimbarea directiei
+        fruit_pos(list[int]) - pozitia fructului
+        fruit_spawn(bool) - daca trebuie sa apara fructul
+        score(int) - scorul jocului
+    """
     global snake_pos, snake_body, snake_speed, direction, change_to, fruit_pos, fruit_spawn, score
     snake_pos = [120, 80]
     snake_body = [[120, 80], [100, 60], [80, 40], [60, 20]]
@@ -72,6 +125,9 @@ def set_game():
     score = 0
 
 def quit_game():
+    """
+    Functia afiseaza high score-ul intr-o noua fereastra, apoi asteapta 3 secunde si inchide sesiunea de joc.
+    """
     game_window.fill(black)
     font = pygame.font.SysFont('arial', 50)
     high_score_surface = font.render('High Score: ' + str(high_score), True, red)
@@ -85,6 +141,12 @@ def quit_game():
     quit()
 
 def game_over():
+    """
+    Functia afiseaza scorul jucatorului si ofera optiunea de a incerca din nou sau de a iesi din joc.
+
+    Variabile globale modificate:
+        high_score(int) - high score-ul jocului
+    """
     global high_score
     update_high_score()
 
@@ -129,12 +191,33 @@ def game_over():
                     quit_game()
 
 def valid_pos(pos):
+    """
+    Functia verifica daca o pozitie este valida pentru a plasa un obstacol.
+    """
     for obs in obstacles:
         if pos == obs:
             return False
     return True
 
 def main():
+    """
+    Functia principala a jocului. 
+    In functie de tastele apasate schimba directia dorita a sarpelui (change_to).
+    Verifica daca directia noua nu este opusa directiei curente (pentru a evita ca sarpele sa se intoarca peste sine).
+    Misca capul sarpelui in directia dorita, iar restul corpului il urmeaza.
+    Daca sarpele mananca fructul, scorul creste si fructul trebuie respawnat.
+    In caz contrar, ultima parte a corpului este eliminata pentru a simula miscarea.
+    Obstacolele, corpul sarpelui si fructul sunt desenate la noile pozitii.
+    Coliziuni cu obstacole, marginea ferestrei sau propriul corp declansează functia game_over.
+    Actualizeaza scorul și viteza, apoi reimprospateaza ecranul.
+    
+    Variabile globale modificate:
+        change_to(string) - schimbarea directiei
+        direction(string) - directia sarpelui
+        fruit_pos(list[int]) - pozitia fructului
+        fruit_spawn(bool) - daca trebuie sa apara fructul
+        score(int) - scorul jocului
+    """
     global change_to, direction, fruit_pos, fruit_spawn, score
     while True:
         for event in pygame.event.get():
